@@ -1,0 +1,100 @@
+﻿
+@{
+    ViewBag.Title = "MAS Global";
+}
+
+<div class="jumbotron">
+    <h1>Employees</h1>
+    <p class="lead">Please type a number to Search an Employee, if you leave it in blank it will bring back all employees</p>
+    <div class="row">
+        <div class="col-md-3">
+            <input id="itemInput" type="number" />
+        </div>
+        <div class="col-md-4">
+            <a id="buttonInput" class="btn btn-primary btn-lg">Get Employees</a>
+        </div>
+    </div>
+</div>
+
+<div id="employeesList">
+    <div class="row">
+        <div class="col-md-1">Id</div>
+        <div class="col-md-2">Name</div>
+        <div class="col-md-2">Contract Type</div>
+        <div class="col-md-2">Role Name</div>
+        <div class="col-md-1">Hourly Salary</div>
+        <div class="col-md-1">Montly Salary</div>
+        <div class="col-md-1">Annual Salary</div>
+    </div>
+    <div id="employeeListBody"></div>
+</div>
+<div class="row" id="notFoundList">
+    <p>There are no employees with the search Criteria</p>
+</div>
+
+@section scripts
+{
+
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+            $("#employeesList").hide();
+            $("#notFoundList").hide();
+            $("#buttonInput").click(function () {
+
+                var id = $("#itemInput").val();
+                var url = '/api/employees';
+                if (id) {
+                    url = url + '/' + id;
+                }
+
+                $.ajax({
+                    type: 'GET',
+                    url: url,
+                    contentType: 'application/json; charset=utf-8',
+                    dataType: 'json',
+                    success: function (data) {
+                        loadEmployees(data);
+                    },
+                });
+            });
+
+
+        });
+
+        function loadEmployees(response) {
+            if (response) {
+                $("#employeeListBody").empty();
+                if (response.count > 1) {
+                    $(response.data).each(function () {
+                        setHtml(this);
+                    });
+                } else if (response.count === 1) {
+                    setHtml(response.data);
+                } else {
+                    $("#employeesList").hide();
+                    $("#notFoundList").show();
+                }
+            }
+        }
+
+        function setHtml(data) {
+            $("#employeesList").show();
+            $("#notFoundList").hide();
+            $("#employeeListBody").append($(
+                '<div class="row">' +
+                '<div class="col-md-1">' + data.Id + '</div>' +
+                '<div class="col-md-2">' + data.Name + '</div>' +
+                '<div class="col-md-2">' + data.ContractTypeName + '</div>' +
+                '<div class="col-md-2">' + data.RoleName + '</div>' +
+                '<div class="col-md-1">' + data.HourlySalary + '</div>' +
+                '<div class="col-md-1">' + data.MonthlySalary + '</div>' +
+                '<div class="col-md-1">' + data.AnnualSalary + '</div>' +
+                '</div>'
+            ));
+        }
+    </script>
+
+
+}
+
